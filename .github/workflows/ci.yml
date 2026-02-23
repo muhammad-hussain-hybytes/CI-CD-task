@@ -14,9 +14,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Build Docker image
+      - name: Build Docker image (no cache)
         run: |
-          docker build -t order-processor:${{ github.sha }} .
+          docker build --no-cache -t order-processor:${{ github.sha }} .
           echo "✅ Image built with tag: ${{ github.sha }}"
       
       - name: Run Trivy vulnerability scanner
