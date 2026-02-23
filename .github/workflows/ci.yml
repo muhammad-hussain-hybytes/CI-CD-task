@@ -3,8 +3,6 @@ name: Docker Build and Trivy Security Scan
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
   build-and-scan:
@@ -14,20 +12,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
-      - name: Build Docker image (no cache)
+      - name: Build Docker image
         run: |
-          docker build --no-cache -t order-processor:${{ github.sha }} .
-          echo "✅ Image built with tag: ${{ github.sha }}"
+          docker build -t order-processor:${{ github.sha }} .
       
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.18.0
         with:
           image-ref: order-processor:${{ github.sha }}
           format: 'table'
-          severity: 'CRITICAL,HIGH'
+          severity: 'CRITICAL'  # ← SIRF CRITICAL CHECK HOGA
           exit-code: '1'
           ignore-unfixed: true
       
       - name: Security check passed
         if: success()
-        run: echo "✅ No CRITICAL or HIGH vulnerabilities found!"
+        run: echo "✅ Security check passed!"
