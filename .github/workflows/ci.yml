@@ -1,0 +1,33 @@
+name: Docker Build and Trivy Security Scan
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Build Docker image
+        run: |
+          docker build -t order-processor:${{ github.sha }} .
+          echo "✅ Image built with tag: ${{ github.sha }}"
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.18.0
+        with:
+          image-ref: order-processor:${{ github.sha }}
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '1'
+          ignore-unfixed: true
+      
+      - name: Security check passed
+        if: success()
+        run: echo "✅ No CRITICAL or HIGH vulnerabilities found!"
